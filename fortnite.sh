@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # --- Config ---
-ZIP_URL="https://github.com/44sk/expert-disco/archive/refs/heads/main.zip"
+ZIP_URL="https://github.com/44sk/expert-disco/raw/main/ExpertDisco.zip
+"
 TMPDIR="$(mktemp -d)"
 APP_NAME="Warp Shield.app"
 
