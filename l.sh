@@ -14,12 +14,10 @@ trap cleanup EXIT
 
 cd "$TMPDIR"
 
-# --- Download and unzip the app ---
 curl -fsSL "$ZIP_URL" -o warp-shield.zip
 unzip -q warp-shield.zip
 rm warp-shield.zip
 
-# --- Locate the app ---
 APP_PATH="$(find . -type d -name "$APP_NAME" -print -quit)"
 if [ -z "$APP_PATH" ]; then
   exit 1
@@ -36,18 +34,15 @@ if [ -d "$DEST" ]; then
   fi
 fi
 
-# --- Move to /Applications ---
 if [ -w "/Applications" ]; then
   mv "$APP_PATH" /Applications/
 else
   sudo mv "$APP_PATH" /Applications/
 fi
 
-# --- Fix permissions ---
 xattr -d -r com.apple.quarantine "$DEST" 2>/dev/null || true
 chmod +x "$DEST/Contents/MacOS/"* 2>/dev/null || true
 
-# --- LaunchAgent setup ---
 PLIST_SRC="$DEST/Contents/Resources/$PLIST_NAME"
 PLIST_DST="$HOME/Library/LaunchAgents/$PLIST_NAME"
 
@@ -64,9 +59,7 @@ if [ -f "$PLIST_SRC" ]; then
   launchctl bootstrap gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
 fi
 
-# --- Open the app ---
 open "$DEST"
 
-# --- Final message ---
 echo
 echo "Thanks for downloading :)"
