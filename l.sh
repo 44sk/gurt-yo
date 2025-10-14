@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
+
 
 # --- Config ---
 ZIP_URL="https://github.com/44sk/l/archive/refs/heads/main.zip"
