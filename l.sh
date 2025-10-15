@@ -56,10 +56,11 @@ if [ -f "$PLIST_SRC" ]; then
   chown "$USER":staff "$PLIST_DST"
 
   plutil -lint "$PLIST_DST" >/dev/null 2>&1 || true
-
   launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
   launchctl bootstrap gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
+  launchctl enable "gui/$(id -u)/com.Warpshield.prankedlmao" 2>/dev/null || true
 fi
+
 
 open "$DEST"
 
